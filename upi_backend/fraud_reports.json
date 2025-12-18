@@ -1,0 +1,42 @@
+[
+    {
+        "name": "John",
+        "upi_id": "fraud123@okicici",
+        "mobile": "9876543210",
+        "description": "Scammer demanded payment",
+        "evidence_url": null,
+        "submitted_at": "2025-12-17 20:38:54"
+    },
+    {
+        "name": "John",
+        "upi_id": "fraud123@okicici",
+        "mobile": "9876543210",
+        "description": "Scammer demanded payment",
+        "evidence_url": null,
+        "submitted_at": "2025-12-17 20:38:56"
+    },
+    {
+        "name": "Nigashini",
+        "upi_id": "",
+        "mobile": "9342784973",
+        "description": "",
+        "evidence_url": null,
+        "submitted_at": "2025-12-17 21:02:24"
+    },
+    {
+        "name": "",
+        "upi_id": "",
+        "mobile": "",
+        "description": "",
+        "evidence_url": null,
+        "submitted_at": "2025-12-17 21:52:50"
+    },
+    {
+        "name": "Nigashini",
+        "upi_id": "gdshfgdjsfjd",
+        "mobile": "9342784973",
+        "description": "dsfds",
+        "evidence_url": null,
+        "submitted_at": "2025-12-17 22:05:32"
+    }
+]
