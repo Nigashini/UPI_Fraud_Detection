@@ -8,7 +8,6 @@ from datetime import datetime
 # ---- Import database functions ----
 from database.database import load_reports, save_report
 
-
 # ------------ Load ML Models ------------
 rf_model = joblib.load("rf_pipeline.joblib")
 iso_model = joblib.load("iso_pipeline.joblib")
@@ -18,7 +17,6 @@ feature_names = [
     "sender_name", "receiver_name", "sender_bank", "receiver_bank",
     "amount", "hour", "day", "month"
 ]
-
 
 # ------------ XAI Explanation ------------
 def explain_prediction(sample, importances):
@@ -33,7 +31,6 @@ def explain_prediction(sample, importances):
     if sample["sender_name"] != sample["receiver_name"]:
         reasons.append("Unusual sender–receiver pattern")
 
-    # top 3 important features
     top_idx = importances.argsort()[::-1][:3]
     top_features = [feature_names[i] for i in top_idx]
     reasons.append(f"Important features: {top_features}")
@@ -62,8 +59,7 @@ class FraudReport(BaseModel):
 
 app = FastAPI()
 
-
-# ------------ CORS for Frontend ------------
+# ------------ CORS ------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -71,7 +67,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ------------ Root ------------
 @app.get("/")
@@ -84,6 +79,7 @@ def home():
 def predict(data: Transaction):
 
     ts = pd.to_datetime(data.timestamp)
+
     sender_bank = data.sender_upi.split("@")[1]
     receiver_bank = data.receiver_upi.split("@")[1]
 
@@ -98,23 +94,32 @@ def predict(data: Transaction):
         "month": ts.month
     }])
 
-    # Random Forest prediction
-    rf_pred = rf_model.predict(new_data)[0]
+    # ---- Model Predictions ----
+    rf_pred = rf_model.predict(new_data)[0]              # 0 or 1
+    rf_prob = rf_model.predict_proba(new_data)[0][1]    # probability
 
-    # Isolation Forest
     iso_raw = iso_model.predict(
         rf_model.named_steps["transform"].transform(new_data)
     )[0]
-    iso_pred = 1 if iso_raw == -1 else 0
+    iso_flag = 1 if iso_raw == -1 else 0
 
-    # Final decision
-    final = 1 if (rf_pred == 1 and iso_pred == 1) else 0
-    prediction = "FRAUD" if final == 1 else "SAFE"
+    # ---- Risk Score Logic ----
+    risk_score = int((rf_prob * 70) + (iso_flag * 30))
+
+    if risk_score >= 60:
+        prediction = "FRAUD"
+    else:
+        prediction = "SAFE"
 
     explanation = explain_prediction(new_data.iloc[0], perm_importances)
 
     return {
         "prediction": prediction,
+        "risk_score": risk_score,
+        "model_signals": {
+            "random_forest": int(rf_pred),
+            "isolation_forest": int(iso_flag)
+        },
         "reason": explanation
     }
 
@@ -122,6 +127,7 @@ def predict(data: Transaction):
 # ------------ Submit Fraud Report API ------------
 @app.post("/report-fraud")
 def report_fraud(report: FraudReport):
+
     report_data = {
         "name": report.name,
         "upi_id": report.upi_id,
