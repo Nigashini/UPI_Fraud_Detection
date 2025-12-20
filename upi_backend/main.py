@@ -148,4 +148,13 @@ def report_fraud(report: FraudReport):
 # ------------ Fetch All Reports ------------
 @app.get("/reports")
 def get_reports():
-    return load_reports()
+    reports = load_reports()
+
+    # keep only valid reports
+    cleaned = [
+        r for r in reports
+        if r.get("upi_id") and r.get("description")
+    ]
+
+    return cleaned
+
