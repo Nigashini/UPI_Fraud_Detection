@@ -6,78 +6,81 @@ import {
   HiExclamationCircle,
   HiMenu,
   HiX,
+  HiViewGrid,
 } from "react-icons/hi";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   const linkClass =
-    "flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 transition";
+    "flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300";
 
   const activeLinkClass =
-    "flex items-center gap-2 px-4 py-2 text-blue-600 font-semibold";
+    "flex items-center gap-2 px-4 py-2 text-white bg-primary/20 border border-primary/30 rounded-lg shadow-lg shadow-primary/10 font-medium";
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-md">
-      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-
+    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* Logo */}
-        <h1 className="text-xl font-bold text-blue-600">Fraud UPI</h1>
-
-        {/* Mobile menu button */}
-        <button className="md:hidden text-2xl" onClick={() => setOpen(!open)}>
-          {open ? <HiX /> : <HiMenu />}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/30">
+            F
+          </div>
+          <h1 className="text-2xl font-heading font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+            Fraud<span className="text-primary">Shield</span>
+          </h1>
+        </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex gap-6">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              isActive ? activeLinkClass : linkClass
-            }
-          >
-            <HiHome /> Home
+        <div className="hidden md:flex gap-4">
+          <NavLink to="/" className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}>
+            <HiHome className="text-xl" /> Home
           </NavLink>
 
-          <NavLink
-            to="/check"
-            className={({ isActive }) =>
-              isActive ? activeLinkClass : linkClass
-            }
-          >
-            <HiSearch /> Check Fraud
+          <NavLink to="/dashboard" className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}>
+            <HiViewGrid className="text-xl" /> Dashboard
           </NavLink>
 
-          <NavLink
-            to="/report"
-            className={({ isActive }) =>
-              isActive ? activeLinkClass : linkClass
-            }
-          >
-            <HiExclamationCircle /> Report Fraud
+          <NavLink to="/check" className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}>
+            <HiSearch className="text-xl" /> Check Fraud
+          </NavLink>
+
+          <NavLink to="/report" className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}>
+            <HiExclamationCircle className="text-xl" /> Report Fraud
           </NavLink>
         </div>
+
+        {/* Mobile menu button */}
+        <button
+          className="md:hidden text-white text-2xl p-2 rounded-lg hover:bg-white/10 transition"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? <HiX /> : <HiMenu />}
+        </button>
       </div>
 
       {/* Mobile Dropdown */}
       {open && (
-        <div className="md:hidden bg-white shadow-md border-t">
+        <div className="md:hidden glass border-t border-white/10 p-4 space-y-2 absolute w-full animate-slide-up">
           <NavLink
             to="/"
-            className={({ isActive }) =>
-              isActive ? activeLinkClass : linkClass
-            }
+            className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}
             onClick={() => setOpen(false)}
           >
             <HiHome /> Home
           </NavLink>
 
           <NavLink
+            to="/dashboard"
+            className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}
+            onClick={() => setOpen(false)}
+          >
+            <HiViewGrid /> Dashboard
+          </NavLink>
+
+          <NavLink
             to="/check"
-            className={({ isActive }) =>
-              isActive ? activeLinkClass : linkClass
-            }
+            className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}
             onClick={() => setOpen(false)}
           >
             <HiSearch /> Check Fraud
@@ -85,9 +88,7 @@ export default function Navbar() {
 
           <NavLink
             to="/report"
-            className={({ isActive }) =>
-              isActive ? activeLinkClass : linkClass
-            }
+            className={({ isActive }) => (isActive ? activeLinkClass : linkClass)}
             onClick={() => setOpen(false)}
           >
             <HiExclamationCircle /> Report Fraud
