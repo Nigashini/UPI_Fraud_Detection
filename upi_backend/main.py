@@ -5,7 +5,6 @@ import joblib
 import pandas as pd
 from datetime import datetime
 
-# ---- Import database functions ----
 from database.database import load_reports, save_report
 
 # ------------ Load ML Models ------------
@@ -14,26 +13,34 @@ iso_model = joblib.load("iso_pipeline.joblib")
 perm_importances = joblib.load("perm_importances.joblib")
 
 feature_names = [
-    "sender_name", "receiver_name", "sender_bank", "receiver_bank",
+    "sender_name", "receiver_name",
+    "sender_bank", "receiver_bank",
     "amount", "hour", "day", "month"
 ]
 
-# ------------ XAI Explanation ------------
-def explain_prediction(sample, importances):
+# ------------ Improved Explainable AI Logic ------------
+def explain_prediction(sample, rf_prob, iso_flag, risk_score):
     reasons = []
 
-    if sample["amount"] > 5000:
+    # HIGH AMOUNT
+    if sample["amount"] >= 5000:
         reasons.append("High transaction amount")
 
-    if sample["hour"] < 6 or sample["hour"] > 22:
+    # UNUSUAL TIME (only if risk is already high)
+    if (sample["hour"] < 6 or sample["hour"] > 22) and risk_score >= 60:
         reasons.append("Transaction at unusual time")
 
-    if sample["sender_name"] != sample["receiver_name"]:
-        reasons.append("Unusual sender–receiver pattern")
+    # SENDER–RECEIVER PATTERN (only when anomaly detected)
+    if iso_flag == 1:
+        reasons.append("Unusual sender–receiver behavior detected")
 
-    top_idx = importances.argsort()[::-1][:3]
-    top_features = [feature_names[i] for i in top_idx]
-    reasons.append(f"Important features: {top_features}")
+    # MODEL CONFIDENCE
+    if rf_prob >= 0.75:
+        reasons.append("ML model strongly predicts fraud pattern")
+
+    # SAFE CASE MESSAGE
+    if risk_score < 60:
+        reasons.append("Transaction behavior appears normal")
 
     return reasons
 
@@ -77,7 +84,6 @@ def home():
 # ------------ Prediction API ------------
 @app.post("/predict")
 def predict(data: Transaction):
-
     ts = pd.to_datetime(data.timestamp)
 
     sender_bank = data.sender_upi.split("@")[1]
@@ -95,23 +101,25 @@ def predict(data: Transaction):
     }])
 
     # ---- Model Predictions ----
-    rf_pred = rf_model.predict(new_data)[0]              # 0 or 1
-    rf_prob = rf_model.predict_proba(new_data)[0][1]    # probability
+    rf_pred = rf_model.predict(new_data)[0]
+    rf_prob = rf_model.predict_proba(new_data)[0][1]
 
     iso_raw = iso_model.predict(
         rf_model.named_steps["transform"].transform(new_data)
     )[0]
     iso_flag = 1 if iso_raw == -1 else 0
 
-    # ---- Risk Score Logic ----
+    # ---- Risk Score (Balanced & Realistic) ----
     risk_score = int((rf_prob * 70) + (iso_flag * 30))
 
-    if risk_score >= 60:
-        prediction = "FRAUD"
-    else:
-        prediction = "SAFE"
+    prediction = "FRAUD" if risk_score >= 60 else "SAFE"
 
-    explanation = explain_prediction(new_data.iloc[0], perm_importances)
+    explanation = explain_prediction(
+        new_data.iloc[0],
+        rf_prob,
+        iso_flag,
+        risk_score
+    )
 
     return {
         "prediction": prediction,
@@ -127,7 +135,6 @@ def predict(data: Transaction):
 # ------------ Submit Fraud Report API ------------
 @app.post("/report-fraud")
 def report_fraud(report: FraudReport):
-
     report_data = {
         "name": report.name,
         "upi_id": report.upi_id,
@@ -136,7 +143,6 @@ def report_fraud(report: FraudReport):
         "evidence_url": report.evidence_url,
         "submitted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-
     save_report(report_data)
 
     return {
@@ -149,12 +155,7 @@ def report_fraud(report: FraudReport):
 @app.get("/reports")
 def get_reports():
     reports = load_reports()
-
-    # keep only valid reports
-    cleaned = [
+    return [
         r for r in reports
         if r.get("upi_id") and r.get("description")
     ]
-
-    return cleaned
-
