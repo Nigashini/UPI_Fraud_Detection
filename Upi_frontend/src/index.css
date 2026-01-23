@@ -1,5 +1,48 @@
-/* stylelint-disable at-rule-no-unknown */
-/* stylelint-disable at-rule-no-unknown */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Brand Colors - Deep Tech Blue/Purple */
+    --primary: 250 84% 54%;      /* #5D3FD3 - Vibrant Purple */
+    --primary-dark: 260 90% 45%; /* #422D96 */
+    --secondary: 190 90% 50%;    /* #00C2E0 - Cyan/Teal accent */
+    
+    /* Backgrounds */
+    --bg-dark: 230 25% 10%;      /* #131520 - Deep Blue Black */
+    --bg-card: 230 25% 14%;      /* #1c1e2d */
+    
+    /* Text */
+    --text-main: 220 20% 97%;    /* Off-white */
+    --text-muted: 220 15% 70%;   /* Light Gray */
+  }
+
+  body {
+    @apply bg-[hsl(var(--bg-dark))] text-[hsl(var(--text-main))] font-['Inter'] antialiased selection:bg-[hsl(var(--primary))] selection:text-white;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-['Outfit'] font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 shadow-xl;
+  }
+  
+  .glass-card {
+    @apply bg-[hsl(var(--bg-card))]/80 backdrop-blur-md border border-white/5 shadow-lg hover:border-[hsl(var(--primary))]/30 transition-all duration-300;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))];
+  }
+  
+  .btn-primary {
+    @apply bg-[hsl(var(--primary))] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[hsl(var(--primary-dark))] hover:shadow-[0_0_20px_hsl(var(--primary)_/_0.3)] hover:-translate-y-0.5 transition-all duration-300 active:translate-y-0;
+  }
+}
