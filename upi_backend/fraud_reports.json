@@ -48,6 +48,7 @@
         "submitted_at": "2025-12-18 23:00:00"
     },
     {
+<<<<<<< HEAD
         "id": "17fa16b5-5392-4cd8-9d3f-dccb8e8f71a4",
         "name": "K. Nigashini ",
         "upi_id": "store@oksbi",
@@ -73,5 +74,29 @@
         "description": "demanding payment",
         "evidence_url": null,
         "submitted_at": "2026-01-23 17:15:04"
+=======
+        "name": "K. Nigashini ",
+        "upi_id": "raji@oksbi",
+        "mobile": "9342784973",
+        "description": "scam",
+        "evidence_url": null,
+        "submitted_at": "2026-01-10 10:01:58"
+    },
+    {
+        "name": "Nigashini",
+        "upi_id": "lottery@okpay",
+        "mobile": "",
+        "description": "claimed i won a lottery",
+        "evidence_url": null,
+        "submitted_at": "2026-01-22 21:12:16"
+    },
+    {
+        "name": "Nigashini",
+        "upi_id": "lottery@okpay",
+        "mobile": "",
+        "description": "Scam",
+        "evidence_url": null,
+        "submitted_at": "2026-01-22 22:11:24"
+>>>>>>> 088519dd445f73fd7704279673eeebff3b91a7ea
     }
 ]
