@@ -16,11 +16,13 @@ export default function Dashboard() {
       } catch (error) {
         // Fallback demo data if server is offline
         console.log("Server offline, using demo data");
-        setReports([
+        const localReports = JSON.parse(localStorage.getItem("fraud_reports") || "[]");
+        const demoReports = [
           { upi_id: "scammer@okhdfcbank", description: "Asked for refundable deposit.", date: "2024-02-20" },
           { upi_id: "fake_shop@ybl", description: "Fake shopping website payment.", date: "2024-02-19" },
           { upi_id: "lottery_winner@axl", description: "Claimed I won a lottery.", date: "2024-02-18" },
-        ]);
+        ];
+        setReports([...localReports, ...demoReports]);
       } finally {
         setLoading(false);
       }
@@ -74,17 +76,18 @@ export default function Dashboard() {
         {loading ? (
           <div className="text-center py-10 text-gray-500">Loading data...</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
+          <div className="overflow-x-auto max-h-96 overflow-y-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse relative">
+              <thead className="sticky top-0 bg-[#1a1f2e] z-10">
                 <tr className="border-b border-white/10 text-sm font-medium text-gray-400">
                   <th className="p-4">UPI ID</th>
                   <th className="p-4">Description</th>
                   <th className="p-4">Status</th>
+                  <th className="p-4">Actions</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {reports.slice(0, 5).map((r, i) => (
+                {reports.map((r, i) => (
                   <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="p-4 font-mono text-secondary">{r.upi_id}</td>
                     <td className="p-4 text-gray-300">{r.description}</td>
@@ -92,6 +95,27 @@ export default function Dashboard() {
                       <span className="px-2 py-1 rounded text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
                         Flagged
                       </span>
+                    </td>
+                    <td className="p-4">
+                      <button
+                        onClick={async () => {
+                          if (!r.id) {
+                            // Fallback for demo/legacy
+                            const updatedReports = reports.filter((_, index) => index !== i);
+                            setReports(updatedReports);
+                            return;
+                          }
+                          try {
+                            await axios.delete(`http://localhost:8000/reports/${r.id}`);
+                            setReports(reports.filter(report => report.id !== r.id));
+                          } catch (err) {
+                            console.error("Failed to delete report:", err);
+                          }
+                        }}
+                        className="text-red-400 hover:text-red-300 transition-colors text-sm"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}

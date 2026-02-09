@@ -42,8 +42,11 @@ export default function ReportFraud() {
       await axios.post("http://localhost:8000/report-fraud", form);
       setStatus({ success: true, message: "Fraud Report Submitted Successfully!" });
       setForm({ name: "", upi_id: "", mobile: "", amount: "", description: "" });
-    } catch (err) {
-      // Demo success for UI testing
+    } catch (err) { // Demo persistence for UI testing
+      const newReport = { ...form, date: new Date().toISOString().split('T')[0] };
+      const existingReports = JSON.parse(localStorage.getItem("fraud_reports") || "[]");
+      localStorage.setItem("fraud_reports", JSON.stringify([newReport, ...existingReports]));
+
       setStatus({ success: true, message: "Report Submitted Successfully (Demo Mode)" });
       setForm({ name: "", upi_id: "", mobile: "", amount: "", description: "" });
     }

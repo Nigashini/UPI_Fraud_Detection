@@ -5,7 +5,8 @@ import joblib
 import pandas as pd
 from datetime import datetime
 
-from database.database import load_reports, save_report
+import uuid
+from database.database import load_reports, save_report, delete_report
 
 # ------------ Load ML Models ------------
 rf_model = joblib.load("rf_pipeline.joblib")
@@ -136,6 +137,7 @@ def predict(data: Transaction):
 @app.post("/report-fraud")
 def report_fraud(report: FraudReport):
     report_data = {
+        "id": str(uuid.uuid4()),
         "name": report.name,
         "upi_id": report.upi_id,
         "mobile": report.mobile,
@@ -159,3 +161,9 @@ def get_reports():
         r for r in reports
         if r.get("upi_id") and r.get("description")
     ]
+
+
+@app.delete("/reports/{report_id}")
+def delete_report_api(report_id: str):
+    delete_report(report_id)
+    return {"message": "Report deleted successfully"}

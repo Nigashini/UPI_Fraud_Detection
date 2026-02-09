@@ -12,12 +12,19 @@ export default function CheckFraud() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (error) setError("");
   };
 
   const submitTransaction = async () => {
+    if (!form.amount || !form.sender_upi || !form.receiver_upi || !form.timestamp) {
+      setError("Please fill in all details.");
+      return;
+    }
+
     setLoading(true);
     setResult(null);
 
@@ -36,12 +43,9 @@ export default function CheckFraud() {
 
       setResult(res.data);
     } catch (err) {
-      // Demo Result for UI testing if backend is offline
-      setResult({
-        prediction: Math.random() > 0.5 ? "FRAUD" : "SAFE",
-        reason: ["High value transaction from new device", "Receiver reported suspicious previously"]
-      });
-      // console.error(err);
+      console.error(err);
+      setError("Server unavailable. Please ensure the backend is running.");
+      setResult(null);
     }
 
     setLoading(false);
@@ -60,6 +64,7 @@ export default function CheckFraud() {
           <p className="text-gray-400">
             Enter details to scan for potential security threats.
           </p>
+          {error && <p className="text-red-500 font-semibold animate-pulse">{error}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -123,8 +128,8 @@ export default function CheckFraud() {
         {result && (
           <div className="mt-8 animate-slide-up">
             <div className={`p-6 rounded-2xl border backdrop-blur-md ${result.prediction === "FRAUD"
-                ? "bg-red-500/10 border-red-500/30 text-red-200"
-                : "bg-green-500/10 border-green-500/30 text-green-200"
+              ? "bg-red-500/10 border-red-500/30 text-red-200"
+              : "bg-green-500/10 border-green-500/30 text-green-200"
               }`}>
               <div className="flex items-center gap-4 mb-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${result.prediction === "FRAUD" ? "bg-red-500/20" : "bg-green-500/20"

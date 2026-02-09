@@ -25,3 +25,16 @@ def save_report(report):
 
     with open(DB_FILE, "w") as file:
         json.dump(reports, file, indent=4)
+
+
+def delete_report(report_id):
+    """
+    Remove a fraud report by ID from the database JSON file.
+    """
+    reports = load_reports()
+    # Filter out the report with the matching ID
+    # Since IDs are strings in JSON, ensure we compare correctly
+    updated_reports = [r for r in reports if r.get("id") != report_id]
+
+    with open(DB_FILE, "w") as file:
+        json.dump(updated_reports, file, indent=4)
